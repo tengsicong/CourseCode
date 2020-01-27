@@ -46,6 +46,9 @@ public class CallGraph {
 
         subclasses = new HashMap<ClassNode, Set<ClassNode>>();
 
+        //For each class,
+        buildInheritanceTrees(classes);
+
         callGraph = new Graph<Signature>();
 
         buildGraph();
@@ -55,12 +58,77 @@ public class CallGraph {
     protected void buildGraph(){
         for(ClassNode cn : classNodes.values()){
             for(MethodNode mn : cn.methods){
-                // add mn to the call graph...
+                process(cn,mn);
             }
         }
     }
 
 
+    /**
+     * From the list classes, map each class to the set of sub-classes.
+     * This is accomplished by, for every class X, identifying its super-class (ClassNode.superName),
+     * obtaining the set of sub-classes for that super-class, and adding X to that set.
+     *
+     * @param classes
+     */
+    private void buildInheritanceTrees(List<ClassNode> classes) {
+        for(ClassNode cn : classes){
+            String superClass = cn.superName;
+            if(superClass!=null)
+                addSubClass(classNodes.get(cn.superName),cn);
+        }
+    }
+
+    private void addSubClass(ClassNode superClass, ClassNode name) {
+        if(subclasses.containsKey(superClass)){
+            Collection<ClassNode> subClasses = subclasses.get(superClass);
+            subClasses.add(name);
+        }
+        else{
+            Set<ClassNode> subClasses = new HashSet<ClassNode>();
+            subClasses.add(name);
+            subclasses.put(superClass,subClasses);
+        }
+    }
+
+
+    protected void process(ClassNode owner,MethodNode current){
+        Signature fromSig = new Signature(owner.name,current.name,current.desc);
+        InsnList instructions = current.instructions;
+        for(int i = 0; i<instructions.size(); i++){
+            AbstractInsnNode instruction = instructions.get(i);
+            //If the instruction is a call to another method...
+            if(instruction.getType() == AbstractInsnNode.METHOD_INSN){
+                MethodInsnNode call = (MethodInsnNode) instruction;
+                Signature target = new Signature(call.owner,call.name,call.desc);
+                String targetClassName = target.getOwner();
+                if(!classNodes.containsKey(targetClassName))
+                    continue;
+                ClassNode targetClass = classNodes.get(targetClassName);
+                Collection<MethodNode> targetsForCall = getAllCandidates(target, targetClass);
+                for(MethodNode mn : targetsForCall){
+                    Signature targetSig = new Signature(targetClassName,mn.name,mn.desc);
+                    callGraph.addNode(fromSig);
+                    callGraph.addNode(targetSig);
+                    callGraph.addEdge(fromSig,targetSig);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * for a given target method in a target class, check whether there are other potential
+     * targets within the class hierarchy below targetClass, and add these to the call graph
+     * (stored in the callGraph class attribute).
+     * @param target
+     * @param targetClass
+     * @return
+     */
+    private Collection<MethodNode> getAllCandidates(Signature target, ClassNode targetClass) {
+        //INSERT CODE HERE.
+        return null;
+    }
 
 
     public String toString(){
