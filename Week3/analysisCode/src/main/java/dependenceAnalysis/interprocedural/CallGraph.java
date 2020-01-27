@@ -68,27 +68,12 @@ public class CallGraph {
      * From the list classes, map each class to the set of sub-classes.
      * This is accomplished by, for every class X, identifying its super-class (ClassNode.superName),
      * obtaining the set of sub-classes for that super-class, and adding X to that set.
+     * Should store inheritance tree in subClasses map (from parent class to set of sub-classes).
      *
      * @param classes
      */
     private void buildInheritanceTrees(List<ClassNode> classes) {
-        for(ClassNode cn : classes){
-            String superClass = cn.superName;
-            if(superClass!=null)
-                addSubClass(classNodes.get(cn.superName),cn);
-        }
-    }
-
-    private void addSubClass(ClassNode superClass, ClassNode name) {
-        if(subclasses.containsKey(superClass)){
-            Collection<ClassNode> subClasses = subclasses.get(superClass);
-            subClasses.add(name);
-        }
-        else{
-            Set<ClassNode> subClasses = new HashSet<ClassNode>();
-            subClasses.add(name);
-            subclasses.put(superClass,subClasses);
-        }
+        // INSERT CODE HERE.
     }
 
 
