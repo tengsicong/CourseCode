@@ -22,7 +22,10 @@ public class ClassDiagram {
     protected boolean ignoreLibraryClasses;
     protected boolean ignoreInnerClasses;
     protected String signaturePrefix = "";
+    //All of the classes in the given directory structure
     protected Set<String> allClassNames;
+    //All of the classes to be included in the final diagram
+    protected Set<String> includedClasses;
 
     /**
      * Instantiating the class will populate the inheritance and association relations.
@@ -41,15 +44,18 @@ public class ClassDiagram {
         inheritance = new HashMap<String, String>();
         associations = new HashMap<String, Set<String>>();
         allClassNames = new HashSet<String>();
+        includedClasses = new HashSet<String>();
 
         for(Class cl : classes){
-            if(includeClass(cl))
-                allClassNames.add(getClassName(cl));
+            allClassNames.add(getClassName(cl));
         }
 
         for(Class cl : classes){
-            if(!includeClass(cl))
-                continue;
+            if(includeClass(cl))
+                includedClasses.add(getClassName(cl));
+        }
+
+        for(Class cl : classes){
             extractInheritanceRelationships(cl);
             extractAssociationRelationships(cl);
         }
@@ -64,7 +70,7 @@ public class ClassDiagram {
      * @param cl
      */
     private void extractAssociationRelationships(Class cl) {
-       //ADD YOUR CODE HERE
+        //INSERT CODE HERE
     }
 
     /**
@@ -74,7 +80,7 @@ public class ClassDiagram {
      * @param cl
      */
     private void extractInheritanceRelationships(Class cl) {
-        //ADD YOUR CODE HERE
+        //INSERT CODE HERE
     }
 
     protected boolean includeClass(Class cl){
@@ -104,21 +110,27 @@ public class ClassDiagram {
         dotGraph.append("digraph classDiagram{\n" +
                 "graph [splines=ortho, rankdir=BT]\n\n");
 
-        for(String className : allClassNames){
+        for(String className : includedClasses){
             dotGraph.append("\""+className + "\"[shape = box];\n");
         }
 
         //Add inheritance relations
         for(String childClass : inheritance.keySet()){
-            String from = "\""+childClass +"\"";
-            String to = "\""+inheritance.get(childClass)+"\"";
-            dotGraph.append(from+ " -> "+to+"[arrowhead = onormal];\n");
+            if(includedClasses.contains(childClass) && includedClasses.contains(inheritance.get(childClass))) {
+                String from = "\"" + childClass + "\"";
+                String to = "\"" + inheritance.get(childClass) + "\"";
+                dotGraph.append(from + " -> " + to + "[arrowhead = onormal];\n");
+            }
         }
 
         //Add associations
         for(String cls : associations.keySet()){
+            if(!includedClasses.contains(cls))
+                continue;
             Set<String> fields = associations.get(cls);
             for(String field : fields) {
+                if(!includedClasses.contains(field))
+                    continue;
                 String from = "\""+cls +"\"";
                 String to = "\""+field+"\"";
                 dotGraph.append(from + " -> " +to + "[arrowhead = diamond];\n");
