@@ -43,7 +43,8 @@ public class ClassDiagram {
         allClassNames = new HashSet<String>();
 
         for(Class cl : classes){
-            allClassNames.add(getClassName(cl));
+            if(includeClass(cl))
+                allClassNames.add(getClassName(cl));
         }
 
         for(Class cl : classes){

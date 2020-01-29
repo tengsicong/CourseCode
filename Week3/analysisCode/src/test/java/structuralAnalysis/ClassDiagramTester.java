@@ -6,7 +6,7 @@ public class ClassDiagramTester {
 
     @Test
     public void analysisCodeClassDiagramTest(){
-        ClassDiagram cd = new ClassDiagram("target/classes", true, true, "");
+        ClassDiagram cd = new ClassDiagram("target/classes", false, true, "");
         System.out.println(cd.toString());
     }
 
